@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DDG geolocator</title>
+</head>
+
+<body style="padding: 0; margin: 0;">
+
+    <style>
+        #address {
+            margin-top: 5vw;
+            font-size: 1.5em;
+            border: 3px solid black;
+            width: calc(100% - 6px);
+        }
+
+        .button-container {
+            justify-content: center;
+            display: flex;
+        }
+
+        #submit {
+            font-size: 1.5em;
+            margin-top: 1em;
+            margin-left: auto;
+            margin-right: auto;
+            border: 3px solid blue;
+            background-color: blue;
+            color: white;
+            padding: 0.25em 0.5em 0.25em 0.5em;
+            border-radius: 0.25em;
+        }
+        .link-container {
+            margin-top: 2em;
+            justify-content: center;
+            display: flex;
+        }
+        #osmand-link {
+            font-size: 2em;
+        }
+		
+        #results-placename, #results-location, #results-description {
+            display: flex;
+            justify-content: center;
+            width: 80%;
+            margin-left: 10%;
+            margin-top:1em;
+        }
+
+    </style>
+    <div style="min-height: 100vh; max-height: 100vh;  max-width: 100%; min-width: 100%; padding: 0; margin: o;">
+        <div style="display: block; width:90%; margin-left:5%;">
+            <input id="address" type="text" placeholder="search address..." />
+        </div>
+        <div class='button-container'>
+            <button id="submit">SUBMIT</button>
+        </div>
+        <div id="lat"></div>
+        <div id="long"></div>
+        <div id="results-placename"></div>
+        <div id="results-location"></div>
+        <div id="results-description"></div>
+		
+        <div class="link-container">
+            <a id="osmand-link"></a>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    function parseResults(myObj) {
+        if(typeof myObj.features[0] != 'undefined') {
+            var mainData = myObj.features[0];
+            window.mainData = mainData;
+            var resultsPlacename = mainData.place_name;
+            document.getElementById('results-placename').innerHTML = '<b>Place Name:</b>&nbsp;'+resultsPlacename;
+	
+            var resultsLocation = mainData.context[1].text;
+            document.getElementById('results-location').innerHTML = '<b>Location:</b>&nbsp;'+resultsLocation;
+	
+            var resultsDescription = mainData.context[2].text;
+            document.getElementById('results-description').innerHTML = '<b>Description:</b>&nbsp;'+resultsDescription;
+	
+            var osmandLink = 'geo:' + mainData.center[1] + ',' + mainData.center[0] + ';u=15';
+            document.getElementById('osmand-link').innerHTML = "open map";
+            document.getElementById('osmand-link').href = osmandLink;
+      
+        } else {
+            document.getElementById('results-placename').innerHTML = '<b>No response to work with.</b>&nbsp;';
+            document.getElementById('results-location').innerHTML = '';
+            document.getElementById('results-description').innerHTML = '';
+            document.getElementById('osmand-link').innerHTML = '';
+   
+        }
+    }
+
+    function getAddress() {
+        if(document.getElementById("scriptblock")) {
+            document.getElementById("scriptblock").remove();
+        }
+        var address = document.getElementById("address").value;
+        address = address.replace('.', '');
+        address = address.replace(',', '');
+        var url = "https://api.duckduckgo.com/local.js?q=" + address + "&cb=parseResults&tg=maps_maps&ha=1&uhm=0&l=us-en&sf=high";
+        let s = document.createElement("script");
+        s.src = url;
+        s.id = "scriptblock";
+        document.body.appendChild(s);
+
+    }
+    document.getElementById("submit").addEventListener("click", function() {
+        if(document.getElementById("address").value != '') {
+            getAddress();
+        }
+    });
+    document.getElementById("address").addEventListener("keypress", function(e) {
+        if (e.key === 'Enter' && document.getElementById("address").value != '') {
+            getAddress();
+        }
+    });
+</script>
+
+</html>
